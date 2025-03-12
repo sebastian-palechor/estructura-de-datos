@@ -1,0 +1,253 @@
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Scanner;
+import java.util.Stack;
+
+class Producto implements Comparable<Producto> {
+    private String codigo;
+    private String descripcion;
+    private int cantidad;
+    private double precio;
+
+    public Producto(String codigo, String descripcion, int cantidad, double precio) {
+        this.codigo = codigo;
+        this.descripcion = descripcion;
+        this.cantidad = cantidad;
+        this.precio = precio;
+    }
+
+    @Override
+    public int compareTo(Producto otro) {
+        return this.codigo.compareTo(otro.codigo);
+    }
+
+    public String getCodigo() { return codigo; }
+    public String getDescripcion() { return descripcion; }
+    public int getCantidad() { return cantidad; }
+    public double getPrecio() { return precio; }
+
+    @Override
+    public String toString() {
+        return codigo + " - " + descripcion + " | Stock: " + cantidad + " | Precio: $" + precio;
+    }
+}
+
+class Inventario {
+    private class Nodo {
+        Producto producto;
+        Nodo siguiente;
+        public Nodo(Producto producto) {
+            this.producto = producto;
+            this.siguiente = null;
+        }
+    }
+
+    private Nodo cabeza;
+    private Stack<Producto> devoluciones = new Stack<>();
+    private Queue<Producto> reposiciones = new LinkedList<>();
+
+    public void agregarProducto(Producto producto) {
+        Nodo nuevo = new Nodo(producto);
+        if (cabeza == null) {
+            cabeza = nuevo;
+        } else {
+            Nodo actual = cabeza;
+            while (actual.siguiente != null) {
+                actual = actual.siguiente;
+            }
+            actual.siguiente = nuevo;
+        }
+    }
+
+    public void mostrarInventario() {
+        Nodo actual = cabeza;
+        if (actual == null) {
+            System.out.println("El inventario está vacío.");
+            return;
+        }
+        while (actual != null) {
+            System.out.println(actual.producto);
+            actual = actual.siguiente;
+        }
+    }
+
+    public void agregarDevolucion(Producto p) {
+        devoluciones.push(p);
+    }
+
+    public void agregarReposicion(Producto p) {
+        reposiciones.offer(p);
+    }
+
+    public void procesarReposicion() {
+        if (!reposiciones.isEmpty()) {
+            System.out.println("Procesando reposición: " + reposiciones.poll());
+        } else {
+            System.out.println("No hay reposiciones pendientes.");
+        }
+    }
+
+    public void ordenarPorPrecio() {
+        Producto[] array = toArray();
+        quickSort(array, 0, array.length - 1);
+        System.out.println("Inventario ordenado por precio:");
+        for (Producto p : array) {
+            System.out.println(p);
+        }
+    }
+
+    private Producto[] toArray() {
+        int size = 0;
+        Nodo actual = cabeza;
+        while (actual != null) {
+            size++;
+            actual = actual.siguiente;
+        }
+
+        Producto[] array = new Producto[size];
+        actual = cabeza;
+        for (int i = 0; i < size; i++) {
+            array[i] = actual.producto;
+            actual = actual.siguiente;
+        }
+        return array;
+    }
+
+    private void quickSort(Producto[] array, int low, int high) {
+        if (low < high) {
+            int pi = partition(array, low, high);
+            quickSort(array, low, pi - 1);
+            quickSort(array, pi + 1, high);
+        }
+    }
+
+    private int partition(Producto[] array, int low, int high) {
+        double pivot = array[high].getPrecio();
+        int i = (low - 1);
+        for (int j = low; j < high; j++) {
+            if (array[j].getPrecio() < pivot) {
+                i++;
+                Producto temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+        Producto temp = array[i + 1];
+        array[i + 1] = array[high];
+        array[high] = temp;
+        return i + 1;
+    }
+
+    public Producto buscarPorCodigo(String codigo) {
+        Producto[] array = toArray();
+        for (Producto p : array) {
+            if (p.getCodigo().equals(codigo)) {
+                return p;
+            }
+        }
+        return null; // No encontrado
+    }
+
+    public Producto buscarPorDescripcion(String descripcion) {
+        Producto[] array = toArray();
+        for (Producto p : array) {
+            if (p.getDescripcion().equalsIgnoreCase(descripcion)) {
+                return p;
+            }
+        }
+        return null; // No encontrado
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Inventario inventario = new Inventario();
+        Scanner scanner = new Scanner(System.in);
+        int opcion;
+
+        do {
+            System.out.println("\n--- Menú de Inventario ---");
+            System.out.println("1. Agregar Producto");
+            System.out.println("2. Mostrar Inventario");
+            System.out.println("3. Procesar Devolución");
+            System.out.println("4. Procesar Reposición");
+            System.out.println("5. Ordenar Inventario por Precio");
+            System.out.println("6. Buscar Producto por Código");
+            System.out.println("7. Buscar Producto por Descripción");
+            System.out.println("0. Salir");
+            System.out.print("Seleccione una opción: ");
+            opcion = scanner.nextInt();
+            scanner.nextLine(); // Limpiar el buffer
+
+            switch (opcion) {
+                case 1:
+                    System.out.print("Ingrese el código del producto: ");
+                    String codigo = scanner.nextLine();
+                    System.out.print("Ingrese la descripción del producto: ");
+                    String descripcion = scanner.nextLine();
+                    System.out.print("Ingrese la cantidad del producto: ");
+                    int cantidad = scanner.nextInt();
+                    System.out.print("Ingrese el precio del producto: ");
+                    double precio = scanner.nextDouble();
+                    inventario.agregarProducto(new Producto(codigo, descripcion, cantidad, precio));
+                    break;
+
+                case 2:
+                    System.out.println("Inventario Actual:");
+                    inventario.mostrarInventario();
+                    break;
+
+                case 3:
+                    System.out.print("Ingrese el código del producto a devolver: ");
+                    String codigoDevolucion = scanner.nextLine();
+                    Producto devolucion = inventario.buscarPorCodigo(codigoDevolucion);
+                    if (devolucion != null) {
+                        inventario.agregarDevolucion(devolucion);
+                        System.out.println("Devolución procesada: " + devolucion);
+                    } else {
+                        System.out.println("Producto no encontrado.");
+                    }
+                    break;
+
+                    case 4:
+                    System.out.print("Ingrese el código del producto a reponer: ");
+                    String codigoReposicion = scanner.nextLine();
+                    Producto reposicion = inventario.buscarPorCodigo(codigoReposicion);
+                    if (reposicion != null) {
+                        inventario.agregarReposicion(reposicion);
+                        System.out.println("Reposición procesada: " + reposicion);
+                    } else {
+                        System.out.println("Producto no encontrado.");
+                    }
+                    break;
+
+                case 5:
+                    inventario.ordenarPorPrecio();
+                    break;
+
+                case 6:
+                    System.out.print("Ingrese el código del producto a buscar: ");
+                    String codigoBuscar = scanner.nextLine();
+                    Producto encontradoPorCodigo = inventario.buscarPorCodigo(codigoBuscar);
+                    System.out.println("Producto encontrado: " + (encontradoPorCodigo != null ? encontradoPorCodigo : "No encontrado"));
+                    break;
+
+                case 7:
+                    System.out.print("Ingrese la descripción del producto a buscar: ");
+                    String descripcionBuscar = scanner.nextLine();
+                    Producto encontradoPorDescripcion = inventario.buscarPorDescripcion(descripcionBuscar);
+                    System.out.println("Producto encontrado: " + (encontradoPorDescripcion != null ? encontradoPorDescripcion : "No encontrado"));
+                    break;
+
+                case 0:
+                    System.out.println("Saliendo del programa...");
+                    break;
+
+                default:
+                    System.out.println("Opción no válida. Intente de nuevo.");
+            }
+        } while (opcion != 0);
+
+        scanner.close();
+    }
+}
