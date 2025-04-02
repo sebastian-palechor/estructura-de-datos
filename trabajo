@@ -1,0 +1,108 @@
+trabajo
+crea un programa en codigo java utilizando el metodo busqueda 
+binaria en el proyecto debe de tener clase estudiante que debe de tener los 
+siguientes atributos numero de estduante, nombre, promedio acumulado ademas implementar
+comparator,comparable por el promedio acumulado, tambien implementar
+arreglo [] de 100 estudiantes, tambien agregar buscar por una nota
+dada (utilizando buscarda binaria), por ultimo contar cuantos estudiante tiene 
+el promedio acumulado mayor a 4.5 agregar un menu con los anterios requisitos
+
+mport java.util.Comparator;
+import java.util.Scanner;
+
+class Estudiante implements Comparable<Estudiante> {
+    private int numeroEstudiante;
+    private String nombre;
+    private double promedioAcumulado;
+
+    public Estudiante(int numeroEstudiante, String nombre, double promedioAcumulado) {
+        this.numeroEstudiante = numeroEstudiante;
+        this.nombre = nombre;
+        this.promedioAcumulado = promedioAcumulado;
+    }
+
+    public double getPromedioAcumulado() {
+        return promedioAcumulado;
+    }
+
+    @Override
+    public int compareTo(Estudiante otro) {
+        return Double.compare(this.promedioAcumulado, otro.promedioAcumulado);
+    }
+
+    @Override
+    public String toString() {
+        return "Estudiante{" +
+                "numeroEstudiante=" + numeroEstudiante +
+                ", nombre='" + nombre + '\'' +
+                ", promedioAcumulado=" + promedioAcumulado +
+                '}';
+    }
+}
+
+public class Main {
+    private static Estudiante[] estudiantes = new Estudiante[100];
+    private static int contadorEstudiantes = 0;
+
+    public static void main(String[] args) {
+        // Agregar estudiantes de ejemplo
+        agregarEstudiante(new Estudiante(1, "Juan", 4.6));
+        agregarEstudiante(new Estudiante(2, "Maria", 3.8));
+        agregarEstudiante(new Estudiante(3, "Pedro", 4.9));
+        agregarEstudiante(new Estudiante(4, "Ana", 4.2));
+        agregarEstudiante(new Estudiante(5, "Luis", 4.7));
+
+        // Ordenar estudiantes por promedio acumulado
+        Arrays.sort(estudiantes, 0, contadorEstudiantes);
+
+        // Buscar por promedio acumulado
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Ingrese el promedio a buscar: ");
+        double promedioBuscado = scanner.nextDouble();
+        int indice = busquedaBinaria(promedioBuscado);
+        if (indice >= 0) {
+            System.out.println("Estudiante encontrado: " + estudiantes[indice]);
+        } else {
+            System.out.println("No se encontró ningún estudiante con ese promedio.");
+        }
+
+        // Contar estudiantes con promedio mayor a 4.5
+        int cantidadMayores = contarEstudiantesConPromedioMayorA(4.5);
+        System.out.println("Cantidad de estudiantes con promedio mayor a 4.5: " + cantidadMayores);
+    }
+
+    private static void agregarEstudiante(Estudiante estudiante) {
+        if (contadorEstudiantes < estudiantes.length) {
+            estudiantes[contadorEstudiantes++] = estudiante;
+        }
+    }
+
+    private static int busquedaBinaria(double promedioBuscado) {
+        int izquierda = 0;
+        int derecha = contadorEstudiantes - 1;
+
+        while (izquierda <= derecha) {
+            int medio = izquierda + (derecha - izquierda) / 2;
+            double promedioMedio = estudiantes[medio].getPromedioAcumulado();
+
+            if (promedioMedio == promedioBuscado) {
+                return medio; // Se encontró el estudiante
+            } else if (promedioMedio < promedioBuscado) {
+                izquierda = medio + 1; // Buscar en la mitad derecha
+            } else {
+                derecha = medio - 1; // Buscar en la mitad izquierda
+            }
+        }
+        return -1; // No se encontró el estudiante
+    }
+
+    private static int contarEstudiantesConPromedioMayorA(double promedio) {
+        int contador = 0;
+        for (int i = 0; i < contadorEstudiantes; i++) {
+            if (estudiantes[i].getPromedioAcumulado() > promedio) {
+                contador++;
+            }
+        }
+        return contador;
+    }
+}
