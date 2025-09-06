@@ -1,0 +1,36 @@
+import java.util.Scanner;
+
+public class ParqueaderoDeLaUSC {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Ingrese el numero de motos en el parqueadero: ");
+        int N = sc.nextInt();
+
+        int[] placas = new int[N];
+
+        System.out.println("Ingrese placas: ");
+        for (int i = 0; i < N; i++) {
+            System.out.print("Placa moto " + (i + 1) + ": ");
+            placas[i] = sc.nextInt();
+        }
+
+        System.out.print("Ingrese la placa a buscar: ");
+        int placaBuscada = sc.nextInt();
+
+        boolean encontrado = false;
+        for (int i = 0; i < N; i++) {
+            if (placas[i] == placaBuscada) {
+                System.out.println("moto esta hubicado en la posicion: " + (i + 1));
+                encontrado = true;
+                break;
+            }
+        }
+
+        if (!encontrado) {
+            System.out.println("La placa no esta registrada en el parqueadero.");
+        }
+
+        sc.close();
+    }
+}
